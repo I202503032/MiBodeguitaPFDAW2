@@ -6,6 +6,7 @@ public class DetalleOrden {
 	       private double cantidad;
 	       private double precion;
 	       private double total;
+	       private double total1;
 	       public DetalleOrden() {
 	    	   
 	    	   
