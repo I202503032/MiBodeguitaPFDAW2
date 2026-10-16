@@ -2,14 +2,15 @@ package com.proyecto.MiBodegaApp.api.controller;
 
 import com.proyecto.MiBodegaApp.api.dto.ProductoRequest;
 import com.proyecto.MiBodegaApp.api.dto.ProductoResponse;
+import com.proyecto.MiBodegaApp.model.MovimientoInventario;
 import com.proyecto.MiBodegaApp.model.Producto;
 import com.proyecto.MiBodegaApp.model.Usuario;
+import com.proyecto.MiBodegaApp.repository.IMovimientoInventarioRepository;
 import com.proyecto.MiBodegaApp.repository.IUsuarioRepository;
 import com.proyecto.MiBodegaApp.service.ProductoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,10 +22,14 @@ import java.util.Map;
 public class ProductoRestController {
     private final ProductoService productoService;
     private final IUsuarioRepository usuarioRepository;
+    private final IMovimientoInventarioRepository movimientoRepository;
 
-    public ProductoRestController(ProductoService productoService, IUsuarioRepository usuarioRepository) {
+    public ProductoRestController(ProductoService productoService,
+                                  IUsuarioRepository usuarioRepository,
+                                  IMovimientoInventarioRepository movimientoRepository) {
         this.productoService = productoService;
         this.usuarioRepository = usuarioRepository;
+        this.movimientoRepository = movimientoRepository;
     }
 
     @GetMapping
@@ -45,6 +50,38 @@ public class ProductoRestController {
         asignarUsuario(request, producto);
         Producto guardado = productoService.save(producto);
         return ResponseEntity.status(HttpStatus.CREATED).body(ProductoResponse.from(guardado));
+    }
+
+    @PostMapping("/{id}/movimiento")
+    public ResponseEntity<?> registrarMovimiento(@PathVariable Integer id, @RequestParam String tipo, @RequestParam int cantidad, @RequestParam String motivo, @RequestParam(required = false) Integer usuarioId) {
+        return productoService.get(id).<ResponseEntity<?>>map(producto -> {
+            if ("SALIDA".equalsIgnoreCase(tipo)) {
+                if (producto.getCantidad() < cantidad) {
+                    return ResponseEntity.badRequest().body(Map.of("mensaje", "Stock insuficiente. No se permite stock negativo. Stock actual: " + producto.getCantidad()));
+                }
+                producto.setCantidad(producto.getCantidad() - cantidad);
+            } else if ("ENTRADA".equalsIgnoreCase(tipo)) {
+                producto.setCantidad(producto.getCantidad() + cantidad);
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("mensaje", "Tipo de movimiento inválido (Use ENTRADA o SALIDA)"));
+            }
+
+            productoService.update(producto);
+
+            // Registrar historial de movimiento
+            MovimientoInventario mov = new MovimientoInventario();
+            mov.setTipo(tipo.toUpperCase());
+            mov.setCantidad(cantidad);
+            mov.setMotivo(motivo);
+            mov.setProducto(producto);
+            if (usuarioId != null) {
+                usuarioRepository.findById(usuarioId).ifPresent(mov::setUsuario);
+            }
+
+            movimientoRepository.save(mov);
+
+            return ResponseEntity.ok(ProductoResponse.from(producto));
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("mensaje", "Producto no encontrado")));
     }
 
     @PutMapping("/{id}")
@@ -77,6 +114,9 @@ public class ProductoRestController {
         producto.setImagen(request.getImagen() == null || request.getImagen().isBlank() ? "default.jpg" : request.getImagen());
         producto.setPrecio(request.getPrecio());
         producto.setCantidad(request.getCantidad());
+        if (request.getStockMinimo() != null) {
+            producto.setStockMinimo(request.getStockMinimo()); // <- Añadir esta línea para persistir el stock mínimo
+        }
     }
 
     private void asignarUsuario(ProductoRequest request, Producto producto) {

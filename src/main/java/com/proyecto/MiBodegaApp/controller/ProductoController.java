@@ -1,27 +1,21 @@
 package com.proyecto.MiBodegaApp.controller;
 
-import java.io.IOException;
-import java.util.Optional;
-
-import org.slf4j.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.proyecto.MiBodegaApp.model.Producto;
 import com.proyecto.MiBodegaApp.model.Usuario;
 import com.proyecto.MiBodegaApp.service.IUsuarioService;
 import com.proyecto.MiBodegaApp.service.ProductoService;
 import com.proyecto.MiBodegaApp.service.UploadFileService;
-
-
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/productos")
@@ -64,8 +58,7 @@ public class ProductoController {
 		return "redirect:/productos";
 	}
 	
-	
-	
+
 	@GetMapping("/edit/{id}")
     public String edit(@PathVariable Integer id, Model model) {
 		Producto producto= new Producto();
@@ -112,6 +105,5 @@ public class ProductoController {
 		productoService.delate(id);
 		return "redirect:/productos";
 	}
-	
-	
+
 }

@@ -44,8 +44,8 @@ export class AppComponent implements OnInit {
     this.error = ''; this.mensaje = '';
     const datos: ProductoRequest = { ...this.formulario, usuarioId: this.usuario?.id ?? null };
     const peticion = this.editandoId === null
-      ? this.api.crearProducto(datos)
-      : this.api.actualizarProducto(this.editandoId, datos);
+        ? this.api.crearProducto(datos)
+        : this.api.actualizarProducto(this.editandoId, datos);
     peticion.subscribe({
       next: () => { this.mensaje = this.editandoId === null ? 'Producto registrado correctamente.' : 'Producto actualizado correctamente.'; this.limpiarFormulario(); this.cargarProductos(); },
       error: (e: HttpErrorResponse) => this.error = e.error?.mensaje ?? 'No se pudo guardar el producto. Revisa los campos e intenta nuevamente.'
@@ -54,7 +54,15 @@ export class AppComponent implements OnInit {
 
   editar(producto: Producto): void {
     this.editandoId = producto.id;
-    this.formulario = { nombre: producto.nombre, descripcion: producto.descripcion ?? '', imagen: producto.imagen ?? '', precio: producto.precio, cantidad: producto.cantidad, usuarioId: producto.usuarioId };
+    this.formulario = {
+      nombre: producto.nombre,
+      descripcion: producto.descripcion ?? '',
+      imagen: producto.imagen ?? '',
+      precio: producto.precio,
+      cantidad: producto.cantidad,
+      stockMinimo: producto.stockMinimo ?? 0,
+      usuarioId: producto.usuarioId
+    };
     this.mensaje = `Editando el producto #${producto.id}.`;
   }
 
@@ -66,6 +74,35 @@ export class AppComponent implements OnInit {
     });
   }
 
+  abrirMovimiento(producto: Producto): void {
+    const tipo = prompt(`Registrar movimiento para: ${producto.nombre}\nEscribe "ENTRADA" o "SALIDA":`)?.toUpperCase();
+    if (tipo !== 'ENTRADA' && tipo !== 'SALIDA') {
+      if (tipo) alert('Tipo de movimiento inválido. Use ENTRADA o SALIDA.');
+      return;
+    }
+    const cantidadStr = prompt('Ingresa la cantidad:');
+    if (!cantidadStr) return;
+    const cantidad = parseInt(cantidadStr, 10);
+    if (isNaN(cantidad) || cantidad <= 0) {
+      alert('Cantidad inválida.');
+      return;
+    }
+    const motivo = prompt('Ingresa el motivo del movimiento (Ej. Venta, Reabastecimiento):') || 'Ajuste';
+
+    this.api.registrarMovimiento(producto.id, tipo, cantidad, motivo, this.usuario?.id ?? null).subscribe({
+      next: () => {
+        this.mensaje = `Movimiento de ${tipo} registrado con éxito.`;
+        this.cargarProductos();
+      },
+      error: (e: HttpErrorResponse) => {
+        this.error = e.error?.mensaje || 'Error al registrar el movimiento.';
+      }
+    });
+  }
+
   limpiarFormulario(): void { this.formulario = this.formularioVacio(); this.editandoId = null; }
-  private formularioVacio(): ProductoRequest { return { nombre: '', descripcion: '', imagen: '', precio: 0.01, cantidad: 0, usuarioId: null }; }
+
+  private formularioVacio(): ProductoRequest {
+    return { nombre: '', descripcion: '', imagen: '', precio: 0.01, cantidad: 0, stockMinimo: 5, usuarioId: null };
+  }
 }

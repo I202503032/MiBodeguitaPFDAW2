@@ -27,7 +27,6 @@ public class DetalleOrden {
 
 	       public DetalleOrden() {
 
-
 	       }
 		   public DetalleOrden(Integer id, String nombre, double cantidad, double total, double precio) {
 			super();
@@ -86,8 +85,6 @@ public class DetalleOrden {
 			return "DetalleOrden [id=" + id + ", nombre=" + nombre + ", cantidad=" + cantidad + ", precio=" + precio
 					+ ", total=" + total + "]";
 		   }
-		
-			
 		}
 		
 			

@@ -24,4 +24,9 @@ export class ApiService {
   eliminarProducto(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/productos/${id}`);
   }
+  registrarMovimiento(productoId: number, tipo: string, cantidad: number, motivo: string, usuarioId: number | null): Observable<Producto> {
+    return this.http.post<Producto>(`${this.baseUrl}/productos/${productoId}/movimiento`, null, {
+      params: { tipo, cantidad, motivo, ...(usuarioId ? { usuarioId } : {}) }
+    });
+  }
 }

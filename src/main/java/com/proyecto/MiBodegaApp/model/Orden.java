@@ -1,15 +1,10 @@
 package com.proyecto.MiBodegaApp.model;
 
+import jakarta.persistence.*;
+
 import java.util.Date;
 import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 @Entity
 @Table(name = "ordenes")
 public class Orden {
@@ -25,7 +20,7 @@ public class Orden {
 	@ManyToOne
 	private Usuario usuario;
 
-	@OneToOne(mappedBy = "orden")
+	@OneToMany(mappedBy = "orden")
 	private List<DetalleOrden>detalle;
 
 	public Orden() {

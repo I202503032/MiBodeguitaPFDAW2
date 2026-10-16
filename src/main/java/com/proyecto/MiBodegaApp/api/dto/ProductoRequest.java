@@ -14,5 +14,6 @@ public class ProductoRequest {
     private String imagen;
     @NotNull @DecimalMin(value = "0.0", inclusive = false) private Double precio;
     @NotNull @Min(0) private Integer cantidad;
+    @NotNull @Min(0) private Integer stockMinimo;
     private Integer usuarioId;
 }
