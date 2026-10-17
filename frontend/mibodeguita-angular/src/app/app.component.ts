@@ -88,7 +88,6 @@ export class AppComponent implements OnInit {
       return;
     }
     const motivo = prompt('Ingresa el motivo del movimiento (Ej. Venta, Reabastecimiento):') || 'Ajuste';
-
     this.api.registrarMovimiento(producto.id, tipo, cantidad, motivo, this.usuario?.id ?? null).subscribe({
       next: () => {
         this.mensaje = `Movimiento de ${tipo} registrado con éxito.`;
@@ -101,8 +100,53 @@ export class AppComponent implements OnInit {
   }
 
   limpiarFormulario(): void { this.formulario = this.formularioVacio(); this.editandoId = null; }
-
   private formularioVacio(): ProductoRequest {
     return { nombre: '', descripcion: '', imagen: '', precio: 0.01, cantidad: 0, stockMinimo: 5, usuarioId: null };
+  }
+
+  exportarInventario() {
+    this.api.exportarExcel().subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'inventario_mibodeguita.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => console.error('Error al descargar el reporte en Excel', err)
+    });
+  }
+  exportarA_PDF() {
+    this.api.exportarPDF().subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'inventario_mibodeguita.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => console.error('Error al descargar el PDF', err)
+    });
+  }
+  exportarA_CSV() {
+    this.api.exportarCSV().subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'inventario_mibodeguita.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => console.error('Error al descargar el CSV', err)
+    });
   }
 }

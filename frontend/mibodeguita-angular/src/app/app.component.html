@@ -88,6 +88,15 @@
                     </table>
                 </div>
                 <button class="button button-light refresh" type="button" (click)="cargarProductos()">Actualizar listado</button>
+                <button class="btn btn-success ms-2" (click)="exportarInventario()">
+                    📊 Exportar a Excel
+                </button>
+                <button class="btn btn-info mt-2 ms-2" (click)="exportarA_PDF()">
+                    📄 Exportar a PDF
+                </button>
+                <button class="btn btn-dark mt-2 ms-2" (click)="exportarA_CSV()">
+                    📋 Exportar a CSV
+                </button>
             </section>
         </div>
     }
