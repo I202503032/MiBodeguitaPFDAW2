@@ -29,5 +29,8 @@
         "serve": { "builder": "@angular-devkit/build-angular:dev-server", "configurations": { "production": { "buildTarget": "mibodeguita-angular:build:production" }, "development": { "buildTarget": "mibodeguita-angular:build:development" } }, "defaultConfiguration": "development" }
       }
     }
+  },
+  "cli": {
+    "analytics": "62206f69-7862-4f4d-b8b9-300ed5c17ebb"
   }
 }
